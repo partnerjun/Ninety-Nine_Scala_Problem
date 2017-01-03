@@ -6,12 +6,16 @@ package list
   */
 
 import scala.annotation.tailrec
+import scala.util.Random
 
 object ListProblems extends App {
 
-//  val list = List(1, 1, 2, 3, 5, 8, 9, 10)
-//  println(insertAt(1000, 3, list))
-  println(range(4, 9))
+  val list = List(1, 2, 3, 4, 5)
+  println(combinations(2, list))
+
+
+
+
 
 
   // P01
@@ -175,7 +179,7 @@ object ListProblems extends App {
   }
 
   // P19
-  def rotate[A](n: Int, lst:List[A]): List[A] = {
+  def rotate[A](n: Int, lst: List[A]): List[A] = {
     if (n > 0)
       lst.drop(n) ::: lst.take(n) ::: Nil
     else {
@@ -185,20 +189,68 @@ object ListProblems extends App {
   }
 
   // P20
-  def removeAt[A](n: Int, lst: List[A]): (List[A], A)= {
+  def removeAt[A](n: Int, lst: List[A]): (List[A], A) = {
     val t = lst.splitAt(n)
     (t._1 ::: t._2.tail, t._2.head)
   }
 
   // P21
-  def insertAt(p:Any, n: Int, lst: List[Any]): List[Any] = lst.splitAt(n) match {
+  def insertAt(p: Any, n: Int, lst: List[Any]): List[Any] = lst.splitAt(n) match {
     case (pre, post) => pre ::: p :: post
   }
 
+  // P22
   def range(fromValue: Int, toValue: Int): List[Int] = {
-//    (fromValue to toValue).toList
-//    List.range(fromValue, toValue + 1)
-    List.iterate(fromValue, toValue-fromValue + 1)(_ + 1)
+    //    (fromValue to toValue).toList
+    //    List.range(fromValue, toValue + 1)
+    List.iterate(fromValue, toValue - fromValue + 1)(_ + 1)
   }
+
+  // P23
+  def randomSelect[A](n: Int, lst: List[A]): List[A] = {
+    @tailrec
+    def randomSelectRecursive(n: Int, lst: List[A], result: List[A]): List[A] = {
+      if (n > 0) {
+        val r: Int = (Math.random() * lst.length - 1).toInt
+        val removeValue = removeAt(r, lst)
+        randomSelectRecursive(n - 1, removeValue._1, removeValue._2 :: result)
+      } else
+        result
+    }
+
+    randomSelectRecursive(n, lst, Nil)
+  }
+
+  // P24
+  def lotto(n: Int, m: Int): List[Int] = {
+    randomSelect(n, List.range(1, m + 1))
+  }
+
+  // P25
+  def randomPermute(lst: List[Int]): List[Int] = {
+    //    randomSelect(lst.length, lst)
+    val arr = lst.toArray
+    val random = new Random()
+    val length = arr.length
+    for (_ <- 1 to length) {
+      val r1 = random.nextInt(length)
+      val r2 = random.nextInt(length)
+      val t = arr(r2)
+      arr.update(r2, arr(r1))
+      arr.update(r1, t)
+    }
+    arr.toList
+  }
+
+  // P26
+  def combinations[A](n: Int, lst: List[A]): List[List[A]] = {
+    if (n == 0) List(Nil)
+    else lst match {
+      case Nil => Nil
+      case h::t =>
+       combinations(n-1, t).map(h::_) :::  combinations(n, t)
+    }
+  }
+
 
 }
