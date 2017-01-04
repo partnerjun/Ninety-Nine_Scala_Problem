@@ -10,10 +10,10 @@ import scala.util.Random
 
 object ListProblems extends App {
 
-  val list = List(1, 2, 3, 4, 5)
-  println(combinations(2, list))
+//  val list = List(1, 2, 3, 4)
+//  println(group(List(2, 2, 5), List("Aldo", "Beat", "Carla", "David", "Evi", "Flip", "Gary", "Hugo", "Ida")))
 
-
+//  println(lsort(List(List('a, 'b, 'c), List('d, 'e), List('f, 'g, 'h), List('d, 'e), List('i, 'j, 'k, 'l), List('m, 'n), List('o))))
 
 
 
@@ -243,14 +243,77 @@ object ListProblems extends App {
   }
 
   // P26
+  // API
+  // lst.combinations(n)
+  /*
+  n = 3, lst = [a, b, c, d, e]일 때
+
+  lst를 h::t로 분해하여
+  t ([b, c, d, e])로 만들어진 엘리먼트 2개의 조합 . map(h::_)를 하면
+  a 가 포함된 엘리먼트 3개의 조합이 만들어진다.
+
+  [b, c, d, e] 역시 마찬가지로 h::t로 분해하여
+  t ([c, d, e])로 만들어진 1개의 조합 . map(h::_)를 하면
+  b 가 포함된 엘리먼트 2개의 조합이 만들어진다.
+  .
+  */
   def combinations[A](n: Int, lst: List[A]): List[List[A]] = {
-    if (n == 0) List(Nil)
-    else lst match {
-      case Nil => Nil
+    if (n == 1) lst.map(List(_))
+    else lst match{
       case h::t =>
-       combinations(n-1, t).map(h::_) :::  combinations(n, t)
+        // 왼쪽은 lst가 a, b, c, d, e일 때 a에 대한 n개 조합을 구하는 것
+        // 오른쪽은 b에 대한 n개 조합을 구하는 것.
+        combinations(n - 1, t).map(h::_) ::: combinations(n, t)
+
+      case _ => Nil // 재귀의 마지막 부분, combination(3, [e])가 들어온 경우에는 빈 리스트를 리턴
     }
   }
 
+  // P27
+  def group3[A](lst: List[A]): List[List[Any]] = {
+    /*
+    List height에 문제가 있음.
+    다른 풀이방법을 찾아보자.
+
+
+    def group(n: Int, lst: List[A]): List[List[Any]] = {
+      if(n == 1) List(lst)
+      else{
+        val r =
+        for{i <- 1 to lst.length
+            t = lst.splitAt(i)
+            if t._2.length >= n-1
+            r = group(n - 1, t._2)
+            if r.nonEmpty
+            l = t._1 :: r} yield l
+        r.toList
+      }
+    }
+    */
+    group3(lst)
+  }
+
+
+  /*
+    nl에 맞는 수의 조합을 만들기 위해, combination 메소드와 diff(difference) 메소드를 사용한다
+    nl=[2, 2, 1], lst=[a,b,c,d,e]인 경우
+    [a,b,c,d,e]에서 두가지 엘리먼트를 이용해 조합을 만든다.
+    [a,b]조합이 만들어졌을 때 [a, b]로 만든 조합과
+    [a,b]가 포함되지 않은 나머지 요소 [c,d,e]로 만든 [2, 1]개의 조합을 합치면 된다.
+  */
+  def group[A](nl: List[Int], lst: List[A]): List[List[List[A]]] = nl match {
+    case Nil     => List(Nil)
+    case h :: t => combinations(h, lst).flatMap{ c =>
+      group(t, lst.diff(c)).map(c::_)
+    }
+  }
+
+
+
+  // P28
+  // 각각의 요소 갯수를 이용해 소팅.
+  def lsort[A](lst: List[List[A]]): List[List[A]] = {
+    lst.sortWith(_.length > _.length)
+  }
 
 }
