@@ -1,6 +1,11 @@
 package logicAndCodes
 
 /**
+  *
+  * P50.
+  * 허프만 코드 알고리즘.
+  * Either니 Option이니 쓰면 쓸 수록 오히려 복잡해지는 것 같다.
+  *
   * @since 2017-01-06
   * @author Park Hyo Jun
   *
@@ -8,9 +13,7 @@ package logicAndCodes
 
 class HuffmanCode[A] {
 
-  // (값 혹은 허프만 코드, weight)
-  type Node = (Either[A, HuffmanNode], Int)
-
+  type Node = (Either[A, HuffmanNode], Int) // (값 혹은 허프만 코드, weight)
   case class HuffmanNode(left: Option[Node], right: Option[Node] = None)
 
   /**
@@ -53,9 +56,7 @@ class HuffmanCode[A] {
 
       // 노드가 한개만 남을 때까지 갯수 오름차순 정렬, 왼쪽 두개 묶기를 반복
       var r: List[Node] = huffmanRecursive(lst.sortWith(_._2 < _._2))
-      do {
-        r = huffmanRecursive(r.sortWith(_._2 < _._2))
-      } while (r.length > 1)
+      do { r = huffmanRecursive(r.sortWith(_._2 < _._2)) } while (r.length > 1)
 
       huffmanRecursive(r).head // 루트노드
     }
@@ -70,19 +71,14 @@ class HuffmanCode[A] {
     def huffmanCodes(root: Node, fix: String = ""): List[(A, String)] = root match {
       case (Left(x), _) => List((x, fix)) // 값 노드인 경우 (값, 허프만 코드) 리턴
       case (Right(x), _) => // 노드인 경우 좌우 재귀호출
-
         val l: List[(A, String)] = x.left match {
-          case Some(z) =>
-            huffmanCodes(z, fix + "0")
+          case Some(z) => huffmanCodes(z, fix + "0")
           case _ => Nil
         }
-
         val r: List[(A, String)] = x.right match {
-          case Some(y) =>
-            huffmanCodes(y, fix + "1")
+          case Some(y) => huffmanCodes(y, fix + "1")
           case _ => Nil
         }
-
         l ::: r
     }
 
