@@ -8,7 +8,13 @@ object LogicAndCodes extends App {
 
   implicit def ImplicitClass(a: Boolean): LogicAndCodesImplicitClass = new LogicAndCodesImplicitClass(a)
 
-  println(gray(10))
+
+  val h = new HuffmanCode[String]
+  println(h.huffman(List(("a", 45), ("b", 13), ("c", 12), ("d", 16), ("e", 9), ("f", 5))))
+//  println(h.huffman(List(("a", 45), ("b", 13), ("c", 12), ("d", 16))))
+
+
+
 
   // P46
   def table2(f: (Boolean, Boolean) => Boolean): Unit = {
