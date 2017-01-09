@@ -19,7 +19,7 @@ class HuffmanCode[A] {
   /**
     * (값, weight) 리스트를 입력받아 (값, 허프만코드) 리스트를 만들어내는 메소드
     *
-    * @param lst
+    * @param lst (값, weight) 리스트
     * @return List[A, HuffmanCode)]
     */
   def huffman(lst: List[(A, Int)]): List[(A, String)] = {
@@ -49,16 +49,12 @@ class HuffmanCode[A] {
         * @param lst 노드 리스트
         * @return 왼쪽 두개가 하프만 노드로 묶인 노드 리스트
         */
-      def huffmanRecursive(lst: List[Node]): List[Node] = lst match {
+      def huffmanRecursive(lst: List[Node]): List[Node] = lst.sortWith(_._2 < _._2) match {
         case Nil | _ :: Nil => lst
-        case h :: m :: t => (Right(HuffmanNode(Some(h), Some(m))), getWeight(Some(h), Some(m))) :: t
+        case h :: m :: t => huffmanRecursive( (Right(HuffmanNode(Some(h), Some(m))), getWeight(Some(h), Some(m))) :: t )
       }
 
-      // 노드가 한개만 남을 때까지 갯수 오름차순 정렬, 왼쪽 두개 묶기를 반복
-      var r: List[Node] = huffmanRecursive(lst.sortWith(_._2 < _._2))
-      do { r = huffmanRecursive(r.sortWith(_._2 < _._2)) } while (r.length > 1)
-
-      huffmanRecursive(r).head // 루트노드
+      huffmanRecursive(lst).head // 루트노드
     }
 
     /**
