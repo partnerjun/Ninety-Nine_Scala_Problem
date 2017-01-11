@@ -10,10 +10,7 @@ object BinaryTrees extends App{
               Node('b', Node('d'), Node('e')),
               Node('c', End, Node('f', Node('g'), End)))
 
-//  println(Tree.cBalanced(5, "x"))
-//  val x = Node('a', Node('b'), Node('c')).isSymmetric
-//  println(root.isSymmetric)
+  println(Node('a', Node('b', End, Node('c')), Node('d')).layoutBinaryTree()._1)
 
-  println(Tree.symmetricBalancedTrees(5, "x"))
 
 }

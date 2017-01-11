@@ -11,49 +11,24 @@ package binarytree
   * @author Park Hyo Jun
   */
 
-sealed abstract class Tree[+T] {
+abstract class Tree[+T] {
+
+  def layoutBinaryTree(x: Int = 1, y: Int = 1): (Tree[T], Int) = ???
+
+  def atLevel(lv: Int): List[T] = ???
+
+  def getInternalList: List[T] = ???
+
+  def getLeafNodeCount: Int = ???
+
+  def getLeafList: List[T] = ???
+
   def isSymmetric: Boolean = ???
+
   def isMirrorOf[R](tree: Tree[R]): Boolean = ???
+
   def addValue[U >: T <% Ordered[U]](x: U): Tree[U] = ???
 }
-
-case class Node[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T] {
-  override def toString: String = "T(" + value.toString + " " + left.toString + " " + right.toString + ")"
-
-  /**
-    * P56
-    * @return 노드의 synmmetric 여부
-    */
-  override def isSymmetric: Boolean = {
-    left.isMirrorOf(right)
-  }
-  override def isMirrorOf[R](otherNode: Tree[R]): Boolean = otherNode match {
-    case x: Node[T] => x.left.isMirrorOf(right) & x.right.isMirrorOf(left)
-    case _ => false
-  }
-
-  /**
-    * P57
-    * @param x 추가할 값
-    * @return 노드가 추가된 트리
-    */
-  override def addValue[U >: T <% Ordered[U]](x: U): Tree[U] = x match {
-    case a if a < value => Node(value, left.addValue(x), right)
-    case _ => Node(value, left, right.addValue(x))
-  }
-}
-
-case object End extends Tree[Nothing] {
-  override def isSymmetric: Boolean = true
-  override def isMirrorOf[R](tree: Tree[R]): Boolean = tree == End
-  override def addValue[U <% Ordered[U]](value: U): Tree[U] = Node(value)
-  override def toString = "."
-}
-
-object Node {
-  def apply[T](value: T): Node[T] = Node(value, End, End)
-}
-
 
 object Tree {
   /**
@@ -86,6 +61,7 @@ object Tree {
   /**
     * P57
     * 위에서 만든 addValue를 이용해 순차적으로 넣도록 함
+    *
     * @param lst 바이너리 트리로 만들 리스트
     * @tparam U 타입
     * @return 만들어진 트리
@@ -98,8 +74,9 @@ object Tree {
   /**
     * P58
     * symmetric balanced tree들을 만드는 메소드
+    *
     * @param number 노드 갯수
-    * @param value 노드 값
+    * @param value  노드 값
     * @tparam T 노드 타입
     * @return 만들어진 트리
     */
@@ -111,13 +88,94 @@ object Tree {
   /**
     * P59
     * balanced tree들을 만드는 메소드
-    * @param number 노드 갯수
-    * @param value 노드 값
+    * balanced tree는 리프노드간의 높이 차이가 0<=1이어야 한다.
+    * 그 말은, 양쪽에 분배된 높이가 같거나 1차이인 트리를 만들면 된다는 것.
+    * 이미 이전 문제에서 map 고차함수를 이용해 트리를 만들었다.
+    *
+    * @param height 노드 높이
+    * @param value  노드 값
     * @tparam T 노트 타입
     * @return 만들어진 트리
     */
-  def hbalTrees[T](number: Int, value: T): List[Tree[T]] = {
-    // TODO
-    Nil
+  def hbalTrees[T](height: Int, value: T): List[Tree[T]] = height match {
+    case 0 => List(End)
+    case 1 => List(Node(value, End, End))
+    case _ =>
+      val greaterLst = hbalTrees(height - 1, value)
+      val lessLst = hbalTrees(height - 2, value)
+      greaterLst.flatMap(x => greaterLst.map(y => Node(value, x, y))) ::: // 양쪽의 차이가 0인 트리
+        lessLst.flatMap(x => greaterLst.flatMap(y => List(Node(value, x, y), Node(value, y, x)))) // 양쪽의 차이가 1인 트리
+  }
+
+
+  // P60
+  def minHbalNodes(height: Int): Int = {
+    def minM(height: Int): Int = height match {
+      case n if n <= 2 => n
+      case _ => 2 * minM(height - 1) // 왼쪽 노드에 다 붙은 경우 + 오른쪽 노드에 다 붙은 경우
+    }
+
+    // 한 쪽이 다른쪽보다 height 1 더 커야 함. 그 경우의 수가 왼쪽/오른쪽으로 두가지.
+    2 * (minM(height - 2) * minM(height - 1))
+  }
+
+  def maxHbalHeight(nodes: Int): Int = {
+    // 루트 노드와 좌우로 나누어진 노드 수 중 큰 갯수의 합
+    1 + Math.floor(nodes / 2).toInt
+  }
+
+  def hbalTreesWithNodes[T](nodes: Int, value: T): List[Tree[T]] = {
+    // 이렇게 구하지 않고 노드 수를 이용해 노드로 만들 수 있는 최소 높이, 최대 높이를 구한 후
+    // hBalTrees 메소드를 이용해 트리들을 만든 후 그 안에서 노드 갯수가 일치하는
+    // 트리만 얻어내는 방법도 있음
+    def hbalTreesWithNodesRecu(nodes: Int, value: T): List[Tree[T]] = nodes match {
+      case n if n <= 1 => List(Node(value))
+      case x => hbalTreesWithNodesRecu(x - 1, value)
+        .flatMap(x => List(Node(value, x, End), Node(value, End, x)))
+    }
+
+    nodes - 1 match {
+      case 0 => List(Node(value))
+      case n if n % 2 == 0 =>
+        val trees = hbalTreesWithNodesRecu(n / 2, value)
+        trees.flatMap(l => trees.map(r => Node(value, l, r)))
+      case n if n % 2 != 0 =>
+        val greaterLst = hbalTreesWithNodesRecu(n / 2 + 1, value)
+        val lessLst = hbalTreesWithNodesRecu(n / 2, value)
+        lessLst.flatMap(l => greaterLst.flatMap(r => List(Node(value, l, r), Node(value, l, r))))
+    }
+  }
+
+  /** P63
+    *
+    * @param nodes 만들 노드의 수
+    * @param value 만들 노드의 값
+    * @tparam T 노드 타입
+    * @return 만들어진 트리
+    */
+  def completeBinaryTree[T](nodes: Int, value: T): Tree[T] = {
+    /** 각 노드에 번호를 붙일 때, 하위 노드의 번호는 왼쪽 2n, 오른쪽 2n+1로 볼 수 있다.
+      *
+      * @param number 노드의번호
+      * @return 하위 노드로 이루어진 트리
+      */
+    def completeBinaryTreeRecu(number: Int): Tree[T] = {
+      if (number > nodes) End
+      else Node(value, completeBinaryTreeRecu(2 * number), completeBinaryTreeRecu(2 * number + 1))
+    }
+
+    completeBinaryTreeRecu(1) // 첫 노드 1번
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
