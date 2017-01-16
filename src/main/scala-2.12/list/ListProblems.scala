@@ -15,6 +15,8 @@ object ListProblems extends App {
 
 //  println(lsort(List(List('a, 'b, 'c), List('d, 'e), List('f, 'g, 'h), List('d, 'e), List('i, 'j, 'k, 'l), List('m, 'n), List('o))))
 
+  val l = List(1,2,3)
+  l.reverse
 
 
 
@@ -110,7 +112,7 @@ object ListProblems extends App {
   def encode[A](lst: List[Any]): List[(Any, Int)] = {
     pack(lst).map(x => (x.head, x.length))
     // wordCount
-    // lst.groupBy(x => x).mapValues(_.length).toList
+//     lst.groupBy(x => x).mapValues(_.length).toList
   }
 
   // P11

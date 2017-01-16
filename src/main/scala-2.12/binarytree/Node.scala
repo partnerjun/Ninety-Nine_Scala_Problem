@@ -13,7 +13,13 @@ object Node {
   * @author Park Hyo Jun
   */
 case class Node[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T] {
-  override def toString: String = "T(" + value.toString + " " + left.toString + " " + right.toString + ")"
+
+  // override def toString: String = "T(" + value.toString + " " + left.toString + " " + right.toString + ")"
+  // P67
+  override def toString: String = (left, right) match {
+    case (End, End) => s"$value"
+    case _ => s"$value(${left.toString},${right.toString})"
+  }
 
   /**
     * P56
@@ -86,4 +92,9 @@ case class Node[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T] {
       val (rightNode, nextX) = right.layoutBinaryTree(thisX + 1, y + 1)
       (new PositionedNode(value, leftNode, rightNode, thisX, y), nextX)
   }
+
+  // P68
+  override def preorder: List[T] = value :: left.preorder ::: right.preorder
+  override def inorder: List[T] = left.inorder ::: value :: right.inorder
+
 }

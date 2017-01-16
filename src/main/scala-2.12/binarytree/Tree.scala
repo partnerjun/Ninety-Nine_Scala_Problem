@@ -1,5 +1,7 @@
 package binarytree
 
+import scala.annotation.tailrec
+
 /**
   * Tree.
   * Full : Child 갯수가 0개 혹은 2개인 경우
@@ -12,6 +14,10 @@ package binarytree
   */
 
 abstract class Tree[+T] {
+
+  def preorder: List[T] = ???
+
+  def inorder: List[T] = ???
 
   def layoutBinaryTree(x: Int = 1, y: Int = 1): (Tree[T], Int) = ???
 
@@ -166,16 +172,65 @@ object Tree {
 
     completeBinaryTreeRecu(1) // 첫 노드 1번
   }
+
+
+
+  /** P67
+    * 문자열을 입력받아 트리로 만드는 메소드
+    * @param str 입력받은 문자열
+    * @return 만들어진 트리
+    */
+  def fromString(str: String): Tree[Char] = {
+
+    def createNode(str: String, value: Char = '\0',
+                   leftNode: Tree[Char] = End,
+                   rightNode: Tree[Char] = End): (Tree[Char], String) = str match {
+
+      case r if r.length ==0 || r.charAt(0) == ')' || r.charAt(0) == ',' =>
+        // )나 ,로 시작하는 경우 지금까지 모은 정보로 노드를 만들어낸다
+        val others = if(r.length > 0) str.substring(1) else ""
+        (Node(value, leftNode, rightNode), others)
+
+      case l if l.charAt(0) == '(' => // (로 시작하는 경우 새 하위노드를 만들기 시작함
+        val (node, leftOthers) = createNode(str.substring(1))
+        (node, leftOthers)
+
+      case x if x.length > 0 => // 기호가 아닌 경우 첫번째 값을 노드의 value로 사용한다.
+        val value = x.charAt(0)
+        if(x.length > 1 && (x.charAt(1) == ',' || x.charAt(1) == ')')){
+          // 하위노드가 없어 기호를 표시하지 않는 경우에는 바로 노드로 만들어냄
+          (Node(value, End, End), x.substring(2))
+        }else {
+          // value를 제외한 문자열로 왼쪽, 오른쪽 노드를 만들어낸다
+          val (leftNode, leftOther) = createNode(x.substring(1))
+          val (rightNode, rightOther) = createNode(leftOther)
+          createNode(rightOther, value, leftNode, rightNode)
+        }
+    }
+
+    createNode(str)._1
+  }
+
+
+  /** P68 B
+    * preorder 리스트와 inorder 리스트를 파라미터로 입력받아
+    * 트리를 만들어내는 문제
+    *
+    * @param preLst preorder 리스트
+    * @param inLst inorder 리스트
+    * @return 두 리스트를 참고해 만든 트리
+    */
+  def preInTree(preLst: List[Char], inLst: List[Char]) : Tree[Char] = {
+
+    /**
+      * @param preLst preorder 리스트
+      * @param inLst inroder 리스트
+      * @return 만들어진 노드
+      */
+    def preInTreeRecu(preLst: List[Char], inLst: List[Char]): Tree[Char] = preLst match {
+      // TODO
+    }
+
+    preInTreeRecu(preLst, inLst)
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-

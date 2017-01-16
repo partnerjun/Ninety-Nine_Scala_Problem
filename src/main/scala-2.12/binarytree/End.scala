@@ -21,5 +21,16 @@ case object End extends Tree[Nothing] {
 
   override def addValue[U <% Ordered[U]](value: U): Tree[U] = Node(value)
 
-  override def toString = "."
+//  override def toString = "."
+
+  // P67
+  override def toString = ""
+
+  override def preorder: List[Nothing] = Nil
+
+  override def inorder: List[Nothing] = Nil
+
+
 }
+
+
