@@ -31,6 +31,7 @@ case object End extends Tree[Nothing] {
   override def inorder: List[Nothing] = Nil
 
 
+  override def toDotstring: String = "."
 }
 
 

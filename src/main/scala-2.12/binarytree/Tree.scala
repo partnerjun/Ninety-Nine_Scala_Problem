@@ -15,6 +15,8 @@ import scala.annotation.tailrec
 
 abstract class Tree[+T] {
 
+  def toDotstring: String = ???
+
   def preorder: List[T] = ???
 
   def inorder: List[T] = ???
@@ -189,7 +191,8 @@ object Tree {
       case r if r.length ==0 || r.charAt(0) == ')' || r.charAt(0) == ',' =>
         // )나 ,로 시작하는 경우 지금까지 모은 정보로 노드를 만들어낸다
         val others = if(r.length > 0) str.substring(1) else ""
-        (Node(value, leftNode, rightNode), others)
+        // 기본값인 경우 End노드로 만듦
+        if(value == '\0') (End, others) else (Node(value, leftNode, rightNode), others)
 
       case l if l.charAt(0) == '(' => // (로 시작하는 경우 새 하위노드를 만들기 시작함
         val (node, leftOthers) = createNode(str.substring(1))
@@ -223,14 +226,52 @@ object Tree {
   def preInTree(preLst: List[Char], inLst: List[Char]) : Tree[Char] = {
 
     /**
+      * 이 메소드는 입력받은 배열들로 무조건 하위 노드를 만든다고 가정함.
+      * preorder 리스트의 헤드는 현재 노드의 값을 나타냄.
+      * 이 값은 inorder리스트에 반드시 존재하고 그 값이 나오기 전까지 나온 값은
+      * 왼쪽 노드, 그 이후 값은 오른쪽 노드에 나오게 된다.
+      *
       * @param preLst preorder 리스트
       * @param inLst inroder 리스트
       * @return 만들어진 노드
       */
     def preInTreeRecu(preLst: List[Char], inLst: List[Char]): Tree[Char] = preLst match {
-      // TODO
+      case Nil => End
+      case h::t =>
+        val (leftNodes, rightNodes) = inLst.span(_ != h)
+        Node(h, preInTreeRecu(t.take(leftNodes.length), leftNodes),
+                preInTreeRecu(t.drop(leftNodes.length), rightNodes.tail))
     }
 
     preInTreeRecu(preLst, inLst)
+  }
+
+
+  /**
+    * P69
+    * @param str .로 표기된 문자열
+    * @return 만들어진 트리
+    */
+  def fromDotstring(str:String): Tree[Char] = {
+
+    /**
+      * 이 메소드는 문자열을 이용해 트리를 만들어낸다고 가정하고 작성함
+      * 첫 문자가 . 인 경우 -> End 노드를 리턴
+      * 그 외의 경우 -> 재귀호출을 통해 End를 만날때까지 호출, 왼쪽 노드에 추가
+      * 남은 문자열로 오른쪽 노드 생성.
+      *
+      * @param lst 문자열 리스트
+      * @return 만들어진 트리, 남은 문자열
+      */
+    def fromDotstringRecu(lst: List[Char]): (Tree[Char], List[Char]) = lst match {
+//      case Nil => (End, Nil)
+//      case h::Nil => (Node(h), Nil)
+      case '.'::t => (End, t)
+      case h::t =>
+        val (leftNode, leftOthers) = fromDotstringRecu(t)
+        val (rightNode, others) = fromDotstringRecu(leftOthers)
+        (Node(h, leftNode, rightNode), others)
+    }
+    fromDotstringRecu(str.toCharArray.toList)._1
   }
 }

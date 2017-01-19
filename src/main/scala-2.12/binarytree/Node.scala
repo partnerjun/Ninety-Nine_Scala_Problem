@@ -97,4 +97,8 @@ case class Node[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T] {
   override def preorder: List[T] = value :: left.preorder ::: right.preorder
   override def inorder: List[T] = left.inorder ::: value :: right.inorder
 
+
+  // P69
+  override def toDotstring: String = value + left.toDotstring + right.toDotstring
+
 }
