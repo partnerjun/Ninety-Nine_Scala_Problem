@@ -45,9 +45,21 @@ case class MTree[+T](value: T, children: List[MTree[T]] = Nil) {
     * @return Lisp-Like tree String
     */
   def lispyTree: String = children.length match {
-    //TODO
-
-    case _ => ""
+    case 0 => this.value.toString
+    case _ =>
+      // 차일드가 있는 경우
+      // 차일드별로 하위 노드를 구성한 후 차일드의 하위 노드가 없으면 그냥 문자열,
+      // 있으면 괄호로 묶인 문자열로 만들어냄
+      val string = this.toString
+      val tuples = MTree.tupler(string.substring(1))
+      val spans = MTree.spaner(tuples)
+      val childs: List[String] = spans.map{x =>
+                                  val xf = x.filter(_._1 != '^').map(_._1)
+                                  if(xf.length == 1) xf.mkString("")
+                                  else xf.mkString("(", " ", ")")
+                                  }
+      val result = s"(${string.charAt(0)} ${childs.mkString(" ")})"
+      result
   }
 
 }
@@ -82,25 +94,24 @@ object MTree {
   }
 
 
+  /**
+    * 입력받은 리스트를 높이별로 그룹핑함
+    * ex) fg^^c^bd^e^^^ => [fg^^, c^, bd^e^^, ^]
+    * 그룹핑된 요소로 만들어진 노드는 하위노드가 됨
+    *
+    * @param tupleLst (문자열, 높이)로 이루어진 리스트
+    * @return 입력받은 리스트를 높이별로
+    */
+  def spaner(tupleLst: List[(Char, Int)]): List[List[(Char, Int)]] = tupleLst match {
+    case Nil => Nil
+    case h :: t if h._1 == '^' => spaner(t) // ^로 시작하는 캐릭터는 높이 구분을 위한 것이므로 삭제
+    case _ :: Nil => List(tupleLst)
+    case lst@h :: _ => // 자신의 높이 -1까지는 자신의 하위 노드가 되므로 span으로 그룹핑할 수 있음.
+      val (result, others) = lst.span(_._2 != h._2 - 1)
+      result :: spaner(others)
+  }
+
   def fromString(str: String): MTree[Char] = {
-
-    /**
-      * 입력받은 리스트를 높이별로 그룹핑함
-      * ex) fg^^c^bd^e^^^ => [fg^^, c^, bd^e^^, ^]
-      * 그룹핑된 요소로 만들어진 노드는 하위노드가 됨
-      *
-      * @param tupleLst (문자열, 높이)로 이루어진 리스트
-      * @return 입력받은 리스트를 높이별로
-      */
-    def spaner(tupleLst: List[(Char, Int)]): List[List[(Char, Int)]] = tupleLst match {
-      case Nil => Nil
-      case h :: t if h._1 == '^' => spaner(t) // ^로 시작하는 캐릭터는 높이 구분을 위한 것이므로 삭제
-      case _ :: Nil => List(tupleLst)
-      case lst@h :: _ => // 자신의 높이 -1까지는 자신의 하위 노드가 되므로 span으로 그룹핑할 수 있음.
-        val (result, others) = lst.span(_._2 != h._2 - 1)
-        result :: spaner(others)
-    }
-
     /** 입력받은 리스트의 헤드로 노드를 만들고
       * 테일을 spanner 메소드를 이용해 그룹핑한다.
       * 그룹핑된 리스트를 재귀호출하면 노드가 될것이므로 그것들을 하위노드로 삼는다.
