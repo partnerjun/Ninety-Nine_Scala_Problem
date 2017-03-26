@@ -7,34 +7,30 @@ package miscellaneous
   */
 class K_regular {
 
-  case class Edge(var from: Int, var to: Int){
-    if(from.compareTo(to) > 0){ // from을 to보다 작은 수로 설정
-      val temp = from
-      from = to
-      to = temp
-    }
-    override def toString: String = s"[$from-$to]"
+  /**
+    * @param value 노드 - 노드의 튜플.
+    */
+  case class Edge(var value: (Int, Int)){
+    if(value._1 > value._2) value = value.swap
+    override def toString: String = s"[${value._1}-${value._2}]"
   }
-
 
   /**
-    * @param n 각 노드가 가질 수 있는 엣지의 갯수
-    * @param k 노드의 갯수
-    * @param lst 노드 목록
-    * @param result 결과를 담는 Set
-    * @return 노드의 갯수와 엣지의 갯수가 올바른 정규 그래프
+    * @param n 노드의 갯수
+    * @param k 각 노드가 가지는 엣지의 갯수
+    * @param lst 노드 목록. 노드 목록은 1 to n이 k번 반복된 값.
+    * @param edges 그래프의 엣지들
+    * @return 정규 그래프
     */
-  def solve(n: Int, k: Int, lst: List[Int], result:Set[Edge]): Set[Set[Edge]] = lst match {
+  private def solve(n: Int, k: Int, lst: List[Int], edges: Set[Edge] = Set.empty): Set[Set[Edge]] = lst match {
     case h::t =>
-        val set = lst.toSet // Set으로 바꿈으로써 중복된 엘리먼트를 제거
-        set.filter(_ != h).flatMap{ v =>
-          val newEdge = Edge(h, v)
-          val nLst = t.diff(List(v))
-          solve(n, k, nLst, result + newEdge)
-        }
-    case Nil => if(result.size == n * k / 2) Set(result) else Set.empty
+      val result = for{v <- lst.toSet.filter(_ != h) // 중복된 노드를 제거하고 같은 노드를 제외한 다른 노드와 연결
+                          newEdge = Edge(h, v)  // 새로운 엣지
+                          nLst = t.diff(List(v))  // 남은 노드에서 이번 선택한 노드만을 제외
+                          if !edges.contains(newEdge)} yield solve(n, k, nLst, edges + newEdge)
+      result.flatten
+    case Nil => Set(edges)
   }
-
 
   /**
     * n * k가 짝수개일때만 답이 존재하며
@@ -44,11 +40,23 @@ class K_regular {
     * @return 만들어질 수 있는 엣지들
     */
   def solution(n: Int, k: Int): Set[Set[Edge]] =
-    if(n * k % 2 != 0) Set.empty
+    if(n * k % 2 != 0 || k > n) Set.empty
     else{
-      val lst2 = List.fill(k)(1 to n).flatten
-      solve(n, k, lst2, Set.empty)
+      val lst = List.fill(k)(1 to n).flatten
+      solve(n, k, lst)
     }
+
+
+}
+
+object K_regular extends App {
+  val c = new K_regular
+
+  var syst = System.currentTimeMillis()
+  val r = c.solution(6, 3)
+    r foreach println
+  println(r.size)
+  println(System.currentTimeMillis() - syst)
 
 
 }

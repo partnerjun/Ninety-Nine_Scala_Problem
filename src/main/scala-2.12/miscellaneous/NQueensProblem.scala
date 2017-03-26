@@ -36,7 +36,7 @@ class NQueensProblem {
     def solveRec(selectable: List[Int], log: List[Int] = Nil): List[List[Int]] = {
       if(selectable.isEmpty)
         List(log) // N개의 수를 모두 사용했다면 답.
-      else selectable.filter(validate(_, log)) // 이번에 놓을 수 있는 위치를 구함
+      else selectable.withFilter(validate(_, log)) // 이번에 놓을 수 있는 위치를 구함
                      .flatMap{i => solveRec(selectable.filterNot(_ == i), i::log)}
         // 선택 가능한 수 중 수 하나를 선택 가능한 수에서 제외하고
         // 퀸을 놓은 열의 리스트에 기록한 후 재귀호출
@@ -52,8 +52,8 @@ object NQueensProblem extends App {
   val cl = new NQueensProblem
 
   val c = System.currentTimeMillis()
-  val r = cl.solve(8)
-  r foreach println
+  val r = cl.solve(12)
+//  r foreach println
   println(r.length)
   println(System.currentTimeMillis() -c )
 
